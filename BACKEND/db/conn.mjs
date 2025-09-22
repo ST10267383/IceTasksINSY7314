@@ -1,21 +1,19 @@
-import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
-dotenv.config();
+import 'dotenv/config';
+import { MongoClient } from 'mongodb';
 
-const connectionString = process.env.ATLAS_URI || "";
+const uri = process.env.MONGODB_URI;
+if (!uri) throw new Error('Missing MONGODB_URI in .env');
 
-console.log(connectionString);
+const dbName = process.env.DB_NAME || 'mydb';
+const client = new MongoClient(uri, { serverSelectionTimeoutMS: 8000 });
 
-const client = new MongoClient(connectionString);
-
-let conn;
 try {
-    conn = await client.connect();
-    console.log('mongodb is CONNECTED!!! :)');
-} catch(e) {
-    console.error(e);
+  await client.connect();
+  console.log('✅ MongoDB connected');
+} catch (err) {
+  console.error('❌ MongoDB connection error:', err?.message || err);
+  process.exit(1);
 }
 
-let db = client.db("users");
-
+const db = client.db(dbName);
 export default db;
